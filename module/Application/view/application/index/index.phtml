@@ -1,0 +1,111 @@
+<table id="task_table" class="table table-bordered table-striped table-hover"></table>
+<div class="modal" id="info-modal" role="dialog" style="display: none;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <label class="col-sm-5" for="title">Заголовок</label>
+                        <div class="col-sm-7">
+                            <input type="text" readonly class="form-control" id="title">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-5" for="date">Дата выполнения</label>
+                        <div class="col-sm-7">
+                            <input type="text" readonly class="form-control" id="date">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-5" for="author">Автор</label>
+                        <div class="col-sm-7">
+                            <input type="text" readonly class="form-control" id="author">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-5" for="status">Статус</label>
+                        <div class="col-sm-7">
+                            <input type="text" readonly class="form-control" id="status">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <label class="col-sm-5" for="description">Описание</label>
+                        <div class="col-sm-7">
+                            <input type="text" readonly class="form-control" id="description">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php
+$this->inlineScript()->captureStart();
+/** @var \Zend\View\Renderer\PhpRenderer $this */
+echo <<< JS
+$(document).ready(function(){
+    var modal = $('#info-modal');
+    var initModal = function (task) {
+        if(!task) return;
+        task = JSON.parse(task);
+        modal.find('.modal-title').html('Информация о задаче №' + task.id);
+        $.each(task, function(key, value){
+            modal.find('[id='+key+']').val(value);
+        });
+        modal.modal('show');
+    };
+    var loadTaskData = function(taskId, row = null) {
+        var url = '{$this->serverUrl('/api/v1/task')}/' + taskId;
+        $.ajax({
+            type: 'GET',
+            url:url,
+            dataType:'json',
+            success: function(response) {
+                if(response.success && response.hasOwnProperty('task')) {
+                    if(row) {
+                        row.data('task', encodeURI(response.task));
+                    }
+                    initModal(response.task);
+                }
+            }
+        });
+    };
+    $('#task_table').DataTable({
+        bProcessing: true,
+        bServerSide: false,
+        sAjaxSource: '{$this->url('api/v1/tasks', ['action' => 'index'])}',
+        orderMulti: false,
+        ordering:true,
+        autoWidth: true,
+        searching: true,
+        columns: [
+            {data: 'id', title:'Номер задачи', searchable: false},
+            {data: 'title', title:'Заголовок', orderable: false},
+            {data:'date', title: 'Дата выполнения', searchable: false, orderable: false}
+        ],
+        createdRow: function(row, data) {
+            row = $(row);
+            row.click(function(){
+                var rowData = row.data('task');
+                if(!rowData) {
+                    initModal(loadTaskData(data.id, row));
+                } else {
+                    initModal(decodeURI(rowData));
+                }
+            })
+        }
+   });
+});
+JS;
+$this->inlineScript()->captureEnd();
+?>
