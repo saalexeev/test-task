@@ -1,0 +1,14 @@
+body {
+    padding-top: 15px;
+    padding-bottom: 40px;
+}
+.modal-body label {
+    margin-top: 0.25rem;
+}
+.modal-body .row {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+input.form-control[readonly] {
+    background-color: white;
+}
