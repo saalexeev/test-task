@@ -58,3 +58,7 @@ server {
 
 Restart the nginx, now you should be ready to go!
 
+### Тестирование
+```bash
+composer test
+```

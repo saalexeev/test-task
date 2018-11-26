@@ -7,12 +7,52 @@
 
 namespace Application;
 
+use Application\Controller\Factory\StorageFactory;
 use Application\Controller\TaskController;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Zend\Cache\Storage\StorageInterface;
 use Zend\Mvc\Controller\LazyControllerAbstractFactory;
 use Zend\Router\Http\Literal;
 use Zend\Router\Http\Segment;
+
+$v1Routes = [
+        'type' => Literal::class,
+        'child_routes' => [
+            'tasks' => [
+                'type' => Literal::class,
+                'options' => [
+                    'route' => '/task',
+                    'defaults' => [
+                        'controller' => TaskController::class,
+                        'action' => 'index'
+                    ]
+                ],
+            ],
+            'task' => [
+                'type' => Segment::class,
+                'options' => [
+                    'route' => '/task/:id',
+                    'defaults' => [
+                        'controller' => TaskController::class,
+                        'action' => 'get-task'
+                    ]
+                ]
+            ]
+        ],
+        'options' => [
+            'route' => '/v1'
+        ]
+];
+$apiRoutes = [
+    'type' => Literal::class,
+    'child_routes' => [
+        'v1' => $v1Routes
+    ],
+    'options' => [
+        'route' => '/api'
+    ]
+];
+
 
 return [
     'router' => [
@@ -27,42 +67,7 @@ return [
                     ],
                 ],
             ],
-            'api' => [
-                'type' => Literal::class,
-                'child_routes' => [
-                    'v1' => [
-                        'type' => Literal::class,
-                        'child_routes' => [
-                            'tasks' => [
-                                'type' => Literal::class,
-                                'options' => [
-                                    'route' => '/task',
-                                    'defaults' => [
-                                        'controller' => TaskController::class,
-                                        'action' => 'index'
-                                    ]
-                                ],
-                            ],
-                            'task' => [
-                                'type' => Segment::class,
-                                'options' => [
-                                    'route' => '/task/:id',
-                                    'defaults' => [
-                                        'controller' => TaskController::class,
-                                        'action' => 'edit'
-                                    ]
-                                ]
-                            ]
-                        ],
-                        'options' => [
-                            'route' => '/v1'
-                        ]
-                    ]
-                ],
-                'options' => [
-                    'route' => '/api'
-                ]
-            ]
+            'api' => $apiRoutes
         ],
     ],
     'controllers' => [
@@ -103,7 +108,7 @@ return [
     ],
     'service_manager' => [
         'factories' => [
-            StorageInterface::class => \Application\Controller\Factory\StorageFactory::class
+            StorageInterface::class => StorageFactory::class
         ],
     ]
 ];
