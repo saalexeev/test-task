@@ -1,7 +1,7 @@
 ## Introduction
 Решение задания https://github.com/Life1over/test-task/blob/master/php.md 
 ### Installing
-- git clone && cd task.sdev
+- git clone && cd test-task
 - Переименовать config/autoload/local.php.dist в config/autoload/local.php и заполнить данные для подключения к Mysql
 - Выдать права www-data на чтение/запись в data/cache
 - Затем:
